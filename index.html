@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PGMI Induction Aggregate Calculator</title>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --accent: #4895ef;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --bg-color: #f0f2f5;
+            --container-bg: #ffffff;
+            --text-color: #212529;
+            --input-bg: #ffffff;
+            --input-border: #ddd;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-mode {
+            --bg-color: #1a1a1a;
+            --container-bg: #2c2c2c;
+            --text-color: #ffffff;
+            --input-bg: #3a3a3a;
+            --input-border: #555;
+            --shadow-color: rgba(0, 0, 0, 0.5);
+            --light: #3a3a3a;
+            --dark: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.4;
+            padding: 10px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--container-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px var(--shadow-color);
+            padding: 15px;
+        }
+
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 5px;
+            font-weight: 600;
+            font-size: 22px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #6c757d;
+            margin-bottom: 15px;
+            font-style: italic;
+            font-size: 12px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 10px;
+            align-items: flex-start;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .form-row.name-row .form-group, .form-row.institution-row .form-group {
+            flex: 0 0 100%;
+            max-width: 300px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: var(--text-color);
+            font-size: 13px;
+        }
+
+        .input-container {
+            display: flex;
+            align-items: center;
+        }
+
+        input, select {
+            width: 100%;
+            max-width: 100px;
+            padding: 8px;
+            border: 2px solid var(--input-border);
+            border-radius: 4px;
+            font-size: 13px;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            transition: border-color 0.3s, background-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        #name, #institution {
+            max-width: 100%;
+        }
+
+        .max-marks {
+            margin-left: 8px;
+            color: #6c757d;
+            font-size: 11px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            flex: 1;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: var(--secondary);
+        }
+
+        #resetBtn {
+            background-color: #6c757d;
+        }
+
+        #resetBtn:hover {
+            background-color: #5a6268;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background-color: var(--primary);
+            color: white;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        .history-toggle {
+            background-color: var(--success);
+            color: white;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            margin: 5px 0;
+            display: inline-block;
+        }
+
+        .history-toggle:hover {
+            background-color: #3da8cc;
+        }
+
+        .results {
+            margin-top: 10px;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+            display: none;
+        }
+
+        .total-aggregate {
+            background-color: #e9f5ff;
+            border-left: 3px solid var(--primary);
+            padding: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .result-label {
+            font-weight: 500;
+        }
+
+        .result-value {
+            font-weight: 600;
+        }
+
+        .error {
+            color: var(--danger);
+            font-size: 11px;
+            margin-top: 3px;
+            display: none;
+        }
+
+        .history {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: var(--light);
+            border-radius: 4px;
+            max-height: 120px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .history h3 {
+            font-size: 13px;
+            margin-bottom: 5px;
+        }
+
+        .history-item {
+            font-size: 11px;
+            margin-bottom: 5px;
+        }
+
+        @media (max-width: 600px) {
+            .form-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .form-group {
+                min-width: 100%;
+            }
+            input, #name, #institution {
+                max-width: 100%;
+            }
+            .container {
+                padding: 10px;
+            }
+            .theme-toggle, .history-toggle {
+                top: 5px;
+                right: 5px;
+                font-size: 10px;
+                padding: 5px 8px;
+            }
+            label {
+                font-size: 12px;
+            }
+            .max-marks {
+                font-size: 10px;
+            }
+            h1 {
+                font-size: 20px;
+            }
+            .subtitle {
+                font-size: 11px;
+            }
+            button {
+                padding: 8px;
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            h1 {
+                font-size: 18px;
+            }
+            .subtitle {
+                font-size: 10px;
+            }
+            .total-aggregate {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()">Toggle Dark Mode</button>
+
+    <div class="container">
+        <h1>PGMI Induction Aggregate Calculator</h1>
+        <p class="subtitle">Created by Dr Shah Zeb</p>
+
+        <!-- Row 0: Institution Selection -->
+        <div class="form-row institution-row">
+            <div class="form-group">
+                <label for="institution">Institution</label>
+                <div class="input-container">
+                    <select id="institution" aria-label="Select institution">
+                        <option value="KMU">KMU</option>
+                        <option value="UHS">UHS</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 1: Name -->
+        <div class="form-row name-row">
+            <div class="form-group">
+                <label for="name">Name (Optional)</label>
+                <div class="input-container">
+                    <input type="text" id="name" placeholder="Enter name" aria-label="Name of person">
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 2: 1st and 2nd Year -->
+        <div class="form-row">
+            <div class="form-group">
+                <label for="firstYear">1st Year Marks</label>
+                <div class="input-container">
+                    <input type="number" id="firstYear" min="0" max="600" placeholder="Marks" aria-label="1st Year Marks">
+                    <span class="max-marks">/ 600</span>
+                </div>
+                <div id="firstYearError" class="error">Marks cannot exceed 600</div>
+            </div>
+            <div class="form-group">
+                <label for="secondYear">2nd Year Marks</label>
+                <div class="input-container">
+                    <input type="number" id="secondYear" min="0" max="700" placeholder="Marks" aria-label="2nd Year Marks">
+                    <span class="max-marks">/ 700</span>
+                </div>
+                <div id="secondYearError" class="error">Marks cannot exceed 700</div>
+            </div>
+        </div>
+
+        <!-- Row 3: 3rd and 4th Year -->
+        <div class="form-row">
+            <div class="form-group">
+                <label for="thirdYear">3rd Year Marks</label>
+                <div class="input-container">
+                    <input type="number" id="thirdYear" min="0" max="800" placeholder="Marks" aria-label="3rd Year Marks">
+                    <span class="max-marks" id="thirdYearMax">/ 800</span>
+                </div>
+                <div id="thirdYearError" class="error">Marks cannot exceed 800</div>
+            </div>
+            <div class="form-group">
+                <label for="fourthYear">4th Year Marks</label>
+                <div class="input-container">
+                    <input type="number" id="fourthYear" min="0" max="1000" placeholder="Marks" aria-label="4th Year Marks">
+                    <span class="max-marks" id="fourthYearMax">/ 1000</span>
+                </div>
+                <div id="fourthYearError" class="error">Marks cannot exceed 1000</div>
+            </div>
+        </div>
+
+        <!-- Row 4: Final Year and Test Marks -->
+        <div class="form-row">
+            <div class="form-group">
+                <label for="finalYear">Final Year Marks</label>
+                <div class="input-container">
+                    <input type="number" id="finalYear" min="0" max="1600" placeholder="Marks" aria-label="Final Year Marks">
+                    <span class="max-marks" id="finalYearMax">/ 1600</span>
+                </div>
+                <div id="finalYearError" class="error">Marks cannot exceed 1600</div>
+            </div>
+            <div class="form-group">
+                <label for="testMarks">Induction Test Marks</label>
+                <div class="input-container">
+                    <input type="number" id="testMarks" min="0" max="100" placeholder="Marks" aria-label="Induction Test Marks">
+                    <span class="max-marks">/ 100</span>
+                </div>
+                <div id="testMarksError" class="error">Marks cannot exceed 100</div>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button id="calculateBtn">Calculate Aggregate</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+
+        <button class="history-toggle" onclick="toggleHistory()">Show History</button>
+
+        <div id="results" class="results">
+            <h2>Calculation Results</h2>
+            <div class="total-aggregate">
+                <span class="result-label">TOTAL AGGREGATE:</span>
+                <span class="result-value" id="totalAgg"></span>
+            </div>
+        </div>
+
+        <div id="history" class="history">
+            <h3>Calculation History</h3>
+            <div id="history-list"></div>
+        </div>
+    </div>
+
+    <script>
+        // Institution max marks configuration
+        const maxMarks = {
+            KMU: { thirdYear: 800, fourthYear: 1000, finalYear: 1600 },
+            UHS: { thirdYear: 1000, fourthYear: 1000, finalYear: 1500 }
+        };
+
+        // Update max marks and labels based on institution
+        function updateMaxMarks(institution) {
+            const inputs = {
+                thirdYear: document.getElementById('thirdYear'),
+                fourthYear: document.getElementById('fourthYear'),
+                finalYear: document.getElementById('finalYear')
+            };
+            const maxLabels = {
+                thirdYear: document.getElementById('thirdYearMax'),
+                fourthYear: document.getElementById('fourthYearMax'),
+                finalYear: document.getElementById('finalYearMax')
+            };
+            const errors = {
+                thirdYear: document.getElementById('thirdYearError'),
+                fourthYear: document.getElementById('fourthYearError'),
+                finalYear: document.getElementById('finalYearError')
+            };
+
+            inputs.thirdYear.max = maxMarks[institution].thirdYear;
+            inputs.fourthYear.max = maxMarks[institution].fourthYear;
+            inputs.finalYear.max = maxMarks[institution].finalYear;
+
+            maxLabels.thirdYear.textContent = / ${maxMarks[institution].thirdYear};
+            maxLabels.fourthYear.textContent = / ${maxMarks[institution].fourthYear};
+            maxLabels.finalYear.textContent = / ${maxMarks[institution].finalYear};
+
+            errors.thirdYear.textContent = Marks cannot exceed ${maxMarks[institution].thirdYear};
+            errors.fourthYear.textContent = Marks cannot exceed ${maxMarks[institution].fourthYear};
+            errors.finalYear.textContent = Marks cannot exceed ${maxMarks[institution].finalYear};
+
+            // Clear inputs if they exceed new max
+            Object.keys(inputs).forEach(key => {
+                const value = parseFloat(inputs[key].value);
+                if (value > maxMarks[institution][key]) {
+                    inputs[key].value = '';
+                }
+            });
+        }
+
+        // Initialize with KMU
+        updateMaxMarks('KMU');
+
+        // Institution change event
+        document.getElementById('institution').addEventListener('change', function() {
+            updateMaxMarks(this.value);
+        });
+
+        // Input validation
+        const inputs = document.querySelectorAll('input[type="number"]');
+        inputs.forEach(input => {
+            input.addEventListener('input', function() {
+                const max = parseFloat(this.max);
+                const value = parseFloat(this.value);
+                const errorDiv = document.getElementById(this.id + 'Error');
+                
+                if (value < 0) {
+                    errorDiv.textContent = 'Marks cannot be negative';
+                    errorDiv.style.display = 'block';
+                    this.value = '';
+                } else if (value > max) {
+                    errorDiv.textContent = Marks cannot exceed ${max};
+                    errorDiv.style.display = 'block';
+                    this.value = '';
+                } else {
+                    errorDiv.style.display = 'none';
+                }
+            });
+        });
+
+        document.getElementById('calculateBtn').addEventListener('click', function() {
+            document.querySelectorAll('.error').forEach(el => el.style.display = 'none');
+
+            const institution = document.getElementById('institution').value;
+            const name = document.getElementById('name').value.trim();
+            const firstYear = parseFloat(document.getElementById('firstYear').value) || 0;
+            const secondYear = parseFloat(document.getElementById('secondYear').value) || 0;
+            const thirdYear = parseFloat(document.getElementById('thirdYear').value) || 0;
+            const fourthYear = parseFloat(document.getElementById('fourthYear').value) || 0;
+            const finalYear = parseFloat(document.getElementById('finalYear').value) || 0;
+            const testMarks = parseFloat(document.getElementById('testMarks').value) || 0;
+
+            let isValid = true;
+            const max = maxMarks[institution];
+
+            if (firstYear > 600) {
+                document.getElementById('firstYearError').style.display = 'block';
+                isValid = false;
+            }
+            if (secondYear > 700) {
+                document.getElementById('secondYearError').style.display = 'block';
+                isValid = false;
+            }
+            if (thirdYear > max.thirdYear) {
+                document.getElementById('thirdYearError').style.display = 'block';
+                isValid = false;
+            }
+            if (fourthYear > max.fourthYear) {
+                document.getElementById('fourthYearError').style.display = 'block';
+                isValid = false;
+            }
+            if (finalYear > max.finalYear) {
+                document.getElementById('finalYearError').style.display = 'block';
+                isValid = false;
+            }
+            if (testMarks > 100) {
+                document.getElementById('testMarksError').style.display = 'block';
+                isValid = false;
+            }
+
+            if ([firstYear, secondYear, thirdYear, fourthYear, finalYear, testMarks].includes(NaN)) {
+                document.getElementById('testMarksError').textContent = 'Please fill all marks fields';
+                document.getElementById('testMarksError').style.display = 'block';
+                isValid = false;
+            }
+
+            if (!isValid) return;
+
+            // Calculate percentages
+            const firstYearPct = (firstYear / 600) * 100;
+            const secondYearPct = (secondYear / 700) * 100;
+            const thirdYearPct = (thirdYear / max.thirdYear) * 100;
+            const fourthYearPct = (fourthYear / max.fourthYear) * 100;
+            const finalYearPct = (finalYear / max.finalYear) * 100;
+
+            // Calculate aggregate
+            const yearlyAvg = (firstYearPct + secondYearPct + thirdYearPct + fourthYearPct + finalYearPct) / 5;
+            const mbbsAgg = yearlyAvg * 0.2;
+            const testAgg = testMarks * 0.75;
+            const totalAgg = mbbsAgg + testAgg;
+
+            // Display result
+            document.getElementById('totalAgg').textContent = totalAgg.toFixed(2) + '%';
+            document.getElementById('results').style.display = 'block';
+
+            // Save history
+            saveCalculation({ institution, name, firstYear, secondYear, thirdYear, fourthYear, finalYear, testMarks }, totalAgg);
+            displayHistory();
+        });
+
+        // Reset button
+        document.getElementById('resetBtn').addEventListener('click', function() {
+            document.querySelectorAll('input').forEach(input => input.value = '');
+            document.getElementById('institution').value = 'KMU';
+            updateMaxMarks('KMU');
+            document.querySelectorAll('.error').forEach(el => el.style.display = 'none');
+            document.getElementById('results').style.display = 'none';
+        });
+
+        // Dark/light mode toggle
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            document.querySelector('.theme-toggle').textContent = document.body.classList.contains('dark-mode')
+                ? 'Toggle Light Mode'
+                : 'Toggle Dark Mode';
+        }
+
+        // History toggle
+        function toggleHistory() {
+            const historyDiv = document.getElementById('history');
+            const button = document.querySelector('.history-toggle');
+            if (historyDiv.style.display === 'none' || historyDiv.style.display === '') {
+                historyDiv.style.display = 'block';
+                button.textContent = 'Hide History';
+                displayHistory();
+            } else {
+                historyDiv.style.display = 'none';
+                button.textContent = 'Show History';
+            }
+        }
+
+        // Calculation history
+        function saveCalculation(inputs, result) {
+            let history = JSON.parse(localStorage.getItem('mbbsCalcHistory')) || [];
+            const max = maxMarks[inputs.institution];
+            history.push({
+                institution: inputs.institution,
+                name: inputs.name || 'Anonymous',
+                inputs: 1st: ${inputs.firstYear}/600, 2nd: ${inputs.secondYear}/700, 3rd: ${inputs.thirdYear}/${max.thirdYear}, 4th: ${inputs.fourthYear}/${max.fourthYear}, Final: ${inputs.finalYear}/${max.finalYear}, Test: ${inputs.testMarks}/100,
+                result: ${result.toFixed(2)}%,
+                timestamp: new Date().toLocaleString()
+            });
+            if (history.length > 10) history.shift();
+            localStorage.setItem('mbbsCalcHistory', JSON.stringify(history));
+        }
+
+        function displayHistory() {
+            const historyList = document.getElementById('history-list');
+            const history = JSON.parse(localStorage.getItem('mbbsCalcHistory')) || [];
+            historyList.innerHTML = '';
+            if (history.length > 0) {
+                history.forEach(entry => {
+                    const div = document.createElement('div');
+                    div.className = 'history-item';
+                    div.textContent = ${entry.timestamp} (${entry.institution}, ${entry.name}): ${entry.inputs} → Total Aggregate: ${entry.result};
+                    historyList.appendChild(div);
+                });
+            }
+        }
+
+        // Load history on page load (hidden)
+        window.onload = function() {
+            displayHistory();
+            document.getElementById('history').style.display = 'none';
+        };
+    </script>
+</body>
+</html>
